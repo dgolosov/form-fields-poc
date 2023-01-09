@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import {ASelect, FieldWrapper} from "./components";
+import {ASelect, FieldWrapper, FieldAny, AInputText } from "./components";
 import {ref} from "vue";
-import AInputText from "./components/form/fields/input-text/AInputText.vue";
-import FieldAny from "./components/form/FieldAny";
 
 const textValue = ref(null)
 const selectValue = ref(null)

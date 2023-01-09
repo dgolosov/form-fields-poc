@@ -3,17 +3,15 @@ import {FieldWrapper} from "./wrapper";
 import type {FieldWrapperSlotProps} from "./wrapper/types";
 
 const inputComponents = {
-    select: () => import('./fields/select/ASelect.vue'),
-    text: () => import('./fields/input-text/AInputText.vue')
-}
-
-type InputComponentType = keyof typeof inputComponents
+    select: [() => import('./fields/select/ASelect.vue'), (props) => ({ options: props.options })],
+    text: [() => import('./fields/input-text/AInputText.vue'), (props) => ({})],
+} as const
 
 export default defineComponent({
     name: 'FieldAny',
     props: {
         type: {
-            type: String as PropType<InputComponentType>,
+            type: String as PropType<keyof typeof inputComponents>,
             required: true,
         },
 
@@ -23,7 +21,7 @@ export default defineComponent({
         modelValue: String,
         rules: String,
 
-        // Select's props
+        // Input component's props
         options: {
             type: Array as PropType<{ label: string; value: string }[]>,
             default: () => [],
@@ -31,11 +29,8 @@ export default defineComponent({
     },
     emits: ['update:modelValue', 'blur', 'focus'],
     setup(props, ctx) {
-        const inputComponent = defineAsyncComponent(inputComponents[props.type])
-        const getInputComponentProps = {
-            select: () => ({ options: props.options }),
-            text: () => ({}),
-        }[props.type]
+        const [componentImport, getInputComponentProps] = inputComponents[props.type]
+        const inputComponent = defineAsyncComponent(componentImport)
 
         return () => h(
             FieldWrapper,
@@ -51,7 +46,7 @@ export default defineComponent({
             {
                 default: (slotProps: FieldWrapperSlotProps) => h(inputComponent, {
                     ...slotProps,
-                    ...getInputComponentProps(),
+                    ...getInputComponentProps(props),
                 }),
             },
         )
